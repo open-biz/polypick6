@@ -18,17 +18,34 @@ export function EarlyAccessModal({ open, onOpenChange }: EarlyAccessModalProps) 
   const [submitted, setSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    setSubmitted(true)
-    setIsLoading(false)
-  }
-
+      const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault()
+      setIsLoading(true)
+  
+      try {
+        const response = await fetch("/api/newsletter", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        })
+  
+        if (response.ok) {
+          setSubmitted(true)
+        } else {
+          const errorData = await response.json()
+          console.error("Subscription error:", errorData.message)
+          // Optionally, display an error message to the user
+          alert(errorData.message || "Failed to subscribe. Please try again.")
+        }
+      } catch (error) {
+        console.error("Network error:", error)
+        alert("An unexpected error occurred. Please try again.")
+      } finally {
+        setIsLoading(false)
+      }
+    }
   const handleClose = () => {
     onOpenChange(false)
     // Reset state after animation completes
